@@ -31,7 +31,7 @@ class Classifier:
         return torch.load('resource/classifier.pt', map_location=torch.device('cpu'))
 
     @st.cache(allow_output_mutation=True)
-    def _load_embedder(self) -> SentenceTransformer.SentenceTransformer:
+    def _load_embedder(self) -> SentenceTransformer:
         return SentenceTransformer('keepitreal/vietnamese-sbert', device='cpu')
 
     def test_prediction(self):
