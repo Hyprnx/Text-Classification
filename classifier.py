@@ -23,11 +23,15 @@ class Classifier:
         self.label_encoder = pickle.load(open('resource/label_encoder.pkl', 'rb'))
 
     @st.cache(allow_output_mutation=True)
-    def _load_model(self):
+    def _load_model(self) -> torch.nn.modules.container.Sequential:
+        """
+        Load model with cache to prevent reloading model after predicting
+        :return: torch model
+        """
         return torch.load('resource/classifier.pt', map_location=torch.device('cpu'))
 
     @st.cache(allow_output_mutation=True)
-    def _load_embedder(self):
+    def _load_embedder(self) -> SentenceTransformer.SentenceTransformer:
         return SentenceTransformer('keepitreal/vietnamese-sbert', device='cpu')
 
     def test_prediction(self):
@@ -39,7 +43,12 @@ class Classifier:
         self.log.info(f"Predicting batch sample : {batch}")
         return self.predict(batch)
 
-    def predict(self, batch: list = []) -> dict[str, str]:
+    def predict(self, batch: list) -> dict[str, str]:
+        """
+        Predict batch of sentences
+        :param batch: list of text that need to be predicted
+        :return: a dictionary of text and its predicted label
+        """
         assert type(batch) == list, "Batch must be a list"
         batch_embedded = self.embedder.encode(batch, convert_to_tensor=True, batch_size=min(len(batch), 2048))
         self.model.eval()
