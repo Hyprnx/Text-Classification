@@ -1,4 +1,5 @@
 from typing import Dict, Any
+from sklearn.preprocessing import LabelEncoder
 import streamlit as st
 import torch
 import pickle
@@ -17,10 +18,10 @@ class Classifier:
     def __init__(self):
         self.log = logging.getLogger(self.__class__.__name__)
         self.log.setLevel(logging.INFO)
-        self.log.info(f'Initializing {self.__class__.__name__}')
+        self.log.info(f'Initializing {self.__class__.__name__}>>>')
         self.embedder = self._load_embedder()
         self.model = self._load_model()
-        self.label_encoder = pickle.load(open('resource/label_encoder.pkl', 'rb'))
+        self.label_encoder = self._load_label_encoder()
 
     @st.cache(allow_output_mutation=True)
     def _load_model(self) -> torch.nn.modules.container.Sequential:
@@ -28,11 +29,25 @@ class Classifier:
         Load model with cache to prevent reloading model after predicting
         :return: torch model
         """
+        self.log.info("Initializing Neural Net>>>")
         return torch.load('resource/classifier.pt', map_location=torch.device('cpu'))
 
     @st.cache(allow_output_mutation=True)
     def _load_embedder(self) -> SentenceTransformer:
+        """
+        Load embedder with cache to prevent reloading embedder after predicting
+        :return: cached vietnamese-sbert SentenceTransformer
+        """
+        self.log.info("Initializing embedder>>>")
         return SentenceTransformer('keepitreal/vietnamese-sbert', device='cpu')
+
+    @st.cache(allow_output_mutation=True)
+    def _load_label_encoder(self) -> LabelEncoder:
+        """
+        Load label encoder with cache to prevent reloading label encoder after predicting
+        :return: LabelEncoder that have been encoded with class label
+        """
+        return pickle.load(open('resource/label_encoder.pkl', 'rb'))
 
     def test_prediction(self):
         """

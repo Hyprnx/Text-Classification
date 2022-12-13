@@ -3,9 +3,16 @@ from classifier import Classifier
 
 classifier = Classifier()
 
-st.header("Demo")
+st.header("Demo with a sample batch")
+st.subheader("""
+    # Interactive Prediction
+    You can try with one, or many samples enter your sample like below, each sample are separated by a comma.
+    The result will be shown after finished running.
+    That's it, let's try!
+""")
+sentence = st.text_input('Input your sentence here:', placeholder="áo choàng đông, iphone 13 promax")
 
-sentence = st.text_input('Input your sentence here:')
+
 sentence = sentence.split(",")
 print(sentence)
 

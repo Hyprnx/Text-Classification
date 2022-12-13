@@ -1,6 +1,7 @@
 import streamlit as st
 
 st.header("Hello, this is our final project for Deep Learning course")
+
 st.subheader("We are going to build a model to predict the category of a product based on its name")
 
 st.header("Our team")
