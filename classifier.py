@@ -1,5 +1,5 @@
 from typing import Dict, Any
-
+import streamlit as st
 import torch
 import pickle
 from sentence_transformers import SentenceTransformer
@@ -18,9 +18,17 @@ class Classifier:
         self.log = logging.getLogger(self.__class__.__name__)
         self.log.setLevel(logging.INFO)
         self.log.info(f'Initializing {self.__class__.__name__}')
-        self.embedder = SentenceTransformer('keepitreal/vietnamese-sbert', device='cpu')
-        self.model = torch.load('resource/classifier.pt', map_location=torch.device('cpu'))
+        self.embedder = self._load_embedder()
+        self.model = self._load_model()
         self.label_encoder = pickle.load(open('resource/label_encoder.pkl', 'rb'))
+
+    @st.cache(allow_output_mutation=True)
+    def _load_model(self):
+        return torch.load('resource/classifier.pt', map_location=torch.device('cpu'))
+
+    @st.cache(allow_output_mutation=True)
+    def _load_embedder(self):
+        return SentenceTransformer('keepitreal/vietnamese-sbert', device='cpu')
 
     def test_prediction(self):
         """
