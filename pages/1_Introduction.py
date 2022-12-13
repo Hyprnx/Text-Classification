@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_extras.switch_page_button import switch_page
 
 st.header("Hello, this is our final project for Deep Learning course")
 
@@ -19,3 +20,7 @@ st.markdown("""
     ##### In this sample website, we will introduce how we clean the data, build the model, show how the model is
      production ready, future plan and finally, we will show a demo of our model.
 """)
+
+next_page = st.button("How we did it")
+if next_page:
+    switch_page("How we did it")

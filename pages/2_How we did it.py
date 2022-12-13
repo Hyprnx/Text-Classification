@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_extras.switch_page_button import switch_page
 
 st.header("This is how we did it")
 st.markdown("# Data Normalization!")
@@ -87,3 +88,8 @@ st.markdown("""
      8x% to 9x% accuracy. In our opinion, choosing what model is not really important, since the result is not 
      much different, but choosing the right model that ready for production environment is. 
 """)
+
+
+next_page = st.button("The Production-Ready part")
+if next_page:
+    switch_page("The Production-Ready part")
