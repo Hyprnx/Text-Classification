@@ -1,6 +1,11 @@
 import streamlit as st
 from classifier import Classifier
 
+st.set_page_config(initial_sidebar_state="collapsed",
+                   page_title="Text Classification",
+                   page_icon="📑",
+                   )
+
 classifier = Classifier()
 
 st.header("Demo with a sample batch")

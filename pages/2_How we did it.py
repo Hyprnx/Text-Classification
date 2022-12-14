@@ -1,13 +1,23 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 
+st.set_page_config(initial_sidebar_state="collapsed",
+                   page_title="Text Classification",
+                   page_icon="📑",
+                   )
+
 st.header("This is how we did it")
 st.markdown("# Data Normalization!")
 
 st.markdown("""
     ## About the dataset
     The data we used were crawled from the ecomerce site [Shopee](https://shopee.vn/). The data were in the form of a
-    csv file with 2 columns: product name and category. 
+    csv file with 2 columns: product name and category. The dataset contains 800 thousand products with 4 categories,
+    which are:
+    - Electronics related (Điện Tử - Điện Máy)
+    - Fashion (Thời Trang)
+    - Mom and Baby (Mẹ và Bé)
+    - Cosmetics (Mỹ Phẩm)
     """)
 
 
@@ -62,13 +72,109 @@ st.markdown("""
 
 st.markdown("""
         ## What text embedding method did we use?
-        We did try a lot of text embedding methods, since calculating text embedding can be done in various methods. But the methods should be
-        fast, reliable, scalable and perhap should be paralellizable. We did try the following methods: 
+        We did try a lot of text embedding methods, since calculating text embedding can be done in various methods. 
+        But the methods should be fast, reliable, scalable and perhap should be paralellizable. We did try the 
+        following methods: 
         - [Vietnamese Sentence Bi-directional Encoder Representations from Transformers ( Vietnamese sBERT)](https://huggingface.co/keepitreal/vietnamese-sbert) from HuggingFace.
         - [phoBERT](https://huggingface.co/vinai/phobert-base) from HuggingFace.
         - [TF-IDF Vectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html) from Scikit-learn.
         - [Count Vectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html) from Scikit-learn.
 """)
+with st.expander("ℹ️ - sBERT", expanded=False):
+    st.markdown(
+        """
+        ### sBERT simple introduction?
+        BERT solves semantic search in a pairwise fashion. It uses a cross-encoder: 2 sentences are passed to BERT 
+        and a similarity score is computed. However, when the number of sentences being compared exceeds 
+        hundreds/thousands of sentences, this would result in a total of $(n)(n-1)/2$ computations being done.
+        """
+    )
+    col1, col2, col3 = st.columns([1, 5, 0.2])
+    with col1:
+        st.write('')
+    with col2:
+        st.image(r"https://miro.medium.com/max/786/1*WhtDBvnmtYaujDRCZOIx4w.webp", width=400)
+    with col3:
+        st.write()
+
+    st.markdown(
+        """
+        The BERT cross-encoder consists of a standard BERT model that takes in as input the two sentences, 
+        A and B, separated by a [SEP] token. On top of the BERT is a feedforward layer that outputs a 
+        similarity score.
+        """)
+
+    st.markdown(
+        """ To overcome this problem, researchers had tried to use BERT to create sentence embeddings. 
+            The most common way was to input individual sentences to BERT — and remember that BERT computes 
+            word-level embeddings, so each word in the sentence would have its own embedding. After the 
+            sentences were inputted to BERT, because of BERT’s word-level embeddings, the most common way to 
+            generate a sentence embedding was by averaging all the word-level embeddings or by using the 
+            output of the first token (i.e. the [CLS] token). However, this method often resulted in bad 
+            sentence embeddings, often averaging worse than 
+            averaged *[GLoVE](https://nlp.stanford.edu/projects/glove/)* embeddings.
+            """)
+    st.markdown(
+        """
+            Essentially, the SBERT network uses a concept called 
+            [Triplet Loss](https://towardsdatascience.com/triplet-loss-advanced-intro-49a07b7d8905)
+            to train its siamese architecture.
+        """)
+
+    st.markdown("""
+    ### What does SBERT do and how does it work?
+    If you look at the original cross-encoder architecture of BERT, SBERT is similar to this but removes the final 
+    classification head. Unlike BERT, SBERT uses a siamese architecture (as I explained above), where it contains 
+    2 BERT architectures that are essentially identical and share the same weights, and SBERT processes 2 sentences 
+    as pairs during training.
+    
+    Let’s say that we feed sentence A to BERT A and sentence B to BERT B in SBERT. Each BERT outputs pooled sentence 
+    embeddings. While the original research paper tried several pooling methods, they found mean-pooling was the best 
+    approach. Pooling is a technique for generalizing features in a network, and in this case, mean pooling works by 
+    averaging groups of features in the BERT.
+    
+    After the pooling is done, we now have 2 embeddings: 1 for sentence A and 1 for sentence B. When the model is 
+    training, SBERT concatenates the 2 embeddings which will then run through a softmax classifier and be trained 
+    using a softmax-loss function. At inference — or when the model actually begins predicting — the two embeddings 
+    are then compared using a cosine similarity function, which will output a similarity score for the two sentences. 
+    Here is a diagram for SBERT when it is fine-tuned and at inference.""")
+
+    col1, col2, col3 = st.columns([1, 5, 0.2])
+    with col1:
+        st.write('')
+    with col2:
+        st.image(r"https://miro.medium.com/max/720/1*6gjaA_TqojVTABHJPNRMng.webp", width=400)
+    with col3:
+        st.write()
+
+    st.markdown("*Source: [An Intuitive Explanation of Sentence-BERT]"
+                "(https://towardsdatascience.com/an-intuitive-explanation-of-sentence-bert-1984d144a868)*")
+
+    st.markdown("")
+
+with st.expander("ℹ️ - phoBERT", expanded=False):
+    st.write(
+        """
+        Place-holder for phoBERT
+        """
+    )
+    st.markdown("")
+
+with st.expander("ℹ️ - TFIDF", expanded=False):
+    st.write(
+        """
+        Place-holder for TFIDF
+        """
+    )
+    st.markdown("")
+
+with st.expander("ℹ️ - Count Vectorizer", expanded=False):
+    st.write(
+        """
+        Place-holder for Count Vectorizer
+        """
+    )
+    st.markdown("")
 
 st.markdown("# Build, train and validate models!")
 st.markdown("""
