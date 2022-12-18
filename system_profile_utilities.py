@@ -2,6 +2,7 @@ import platform
 import socket
 import re
 from distro import LinuxDistribution
+import GPUtil
 import uuid
 import json
 from datetime import datetime
@@ -96,6 +97,21 @@ def get_system_info():
             vendor_id_raw=cpu_info['vendor_id_raw']
         )
 
+        gpu_info = GPUtil.getGPUs()
+        info["GPU"] = dict()
+        for index, gpu in enumerate(gpu_info):
+            info["GPU"][f"gpu_{index}"] = dict(
+                gpu_name=gpu.name,
+                gpu_load=gpu.load,
+                gpu_memory_total=get_size(gpu.memoryTotal),
+                gpu_memory_used=get_size(gpu.memoryUsed),
+                gpu_memory_free=get_size(gpu.memoryFree),
+                gpu_temperature=gpu.temperature,
+                gpu_driver=gpu.driver,
+                gpu_uuid=gpu.uuid,
+                gpu_serial=gpu.serial
+            )
+
         memory_info = psutil.virtual_memory()
         info["RAM"] = dict(
             ram_total=str(get_size(memory_info.total)),
@@ -108,10 +124,29 @@ def get_system_info():
         )
 
         disk_info = psutil.disk_partitions()
-        info['DISK'] = {"list disk": [(index, disk.device) for index, disk in enumerate(disk_info)]}
+        info['DISK'] = {"list disk": [dict(index=index, device=disk.device, mount_point=disk.mountpoint,
+                                           sys_file_type=disk.fstype) for index, disk in enumerate(disk_info)]}
         for i, disk in enumerate(disk_info):
             info['DISK'][f'disk_{i}_total'] = str(get_size(psutil.disk_usage(disk.mountpoint).total))
             info['DISK'][f'disk_{i}_free'] = str(get_size(psutil.disk_usage(disk.mountpoint).free))
+
+        info["NETWORK"] = dict()
+        if_addrs = psutil.net_if_addrs()
+        for interface_name, interface_addresses in if_addrs.items():
+            for index, address in enumerate(interface_addresses):
+                info["NETWORK"][f"network_{index}"] = dict()
+                if str(address.family) == 'AddressFamily.AF_INET':
+                    info["NETWORK"][f"network_{index}"]["IP Address"] = str(address.address)
+                    info["NETWORK"][f"network_{index}"]["Netmask"] = str(address.netmask)
+                    info["NETWORK"][f"network_{index}"]["IP Broadcast"] = str(address.broadcast)
+                elif str(address.family) == 'AddressFamily.AF_PACKET':
+                    info["NETWORK"][f"network_{index}"]["MAC Address"] = str(address.address)
+                    info["NETWORK"][f"network_{index}"]["Netmask"] = str(address.netmask)
+                    info["NETWORK"][f"network_{index}"]["Broadcast MAC"] = str(address.broadcast)
+
+        net_io = psutil.net_io_counters()
+        info["NETWORK"]['Total_Sent'] = get_size(net_io.bytes_sent)
+        info["NETWORK"]['Total_Received'] = get_size(net_io.bytes_sent)
 
         return json.dumps(info)
     except Exception as e:
@@ -122,5 +157,3 @@ if __name__ == "__main__":
     from pprint import pprint
 
     pprint(json.loads(get_system_info()))
-
-    pprint(get_cpu_info())
