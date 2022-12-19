@@ -16,7 +16,7 @@ st.markdown("""
     That's it, let's try!
 """)
 sentence = st.text_input('Input your sentence here:', placeholder="áo choàng đông, iphone 13 promax",
-                         autocomplete='product')
+                         autocomplete='on')
 
 
 sentence = sentence.split(",")
