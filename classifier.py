@@ -20,7 +20,7 @@ class Classifier:
         begin = time()
         self.log = logging.getLogger(self.__class__.__name__)
         self.log.setLevel(logging.INFO)
-        self.log.info(f'Initializing {self.__class__.__name__}>>>')
+        self.log.info(f'Initializing {self.__class__.__name__} >>>')
         self.embedder = self._load_embedder()
         self.model = self._load_model()
         self.label_encoder = self._load_label_encoder()
@@ -78,9 +78,9 @@ class Classifier:
             pred = ps.max(1).indices.cpu().numpy()
             res = [self.label_encoder.inverse_transform([i])[0] for i in pred]
 
-        res['time_taken'] = time() - begin
+        total_pred_time = time() - begin
 
-        return dict(zip(batch, res))
+        return dict(zip(batch, res)), total_pred_time
 
 
 if __name__ == "__main__":
