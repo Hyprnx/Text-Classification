@@ -6,6 +6,7 @@ import pickle
 from sentence_transformers import SentenceTransformer
 import logging
 import warnings
+from time import time
 
 warnings.filterwarnings("ignore")
 
@@ -16,12 +17,15 @@ log.setLevel(logging.INFO)
 
 class Classifier:
     def __init__(self):
+        begin = time()
         self.log = logging.getLogger(self.__class__.__name__)
         self.log.setLevel(logging.INFO)
         self.log.info(f'Initializing {self.__class__.__name__}>>>')
         self.embedder = self._load_embedder()
         self.model = self._load_model()
         self.label_encoder = self._load_label_encoder()
+        self.log.info(f'Initialized {self.__class__.__name__} accomplished in {time() - begin} seconds')
+
 
     @st.cache(allow_output_mutation=True)
     def _load_model(self) -> torch.nn.modules.container.Sequential:
@@ -65,6 +69,7 @@ class Classifier:
         :return: a dictionary of text and its predicted label
         """
         assert type(batch) == list, "Batch must be a list"
+        begin = time()
         batch_embedded = self.embedder.encode(batch, convert_to_tensor=True, batch_size=min(len(batch), 2048))
         self.model.eval()
         with torch.no_grad():
@@ -72,6 +77,8 @@ class Classifier:
             ps = torch.exp(out_data)
             pred = ps.max(1).indices.cpu().numpy()
             res = [self.label_encoder.inverse_transform([i])[0] for i in pred]
+
+        res['time_taken'] = time() - begin
 
         return dict(zip(batch, res))
 
