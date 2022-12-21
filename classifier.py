@@ -1,4 +1,4 @@
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 from sklearn.preprocessing import LabelEncoder
 import streamlit as st
 import torch
@@ -9,6 +9,7 @@ import warnings
 from time import time
 import onnx
 import onnxruntime as ort
+from normalizer import norm
 
 warnings.filterwarnings("ignore")
 
@@ -38,9 +39,9 @@ class BaseClassifier:
         raise NotImplementedError("Implement in child class")
 
 
-class Classifier(BaseClassifier):
+class TorchClassifier(BaseClassifier):
     def __init__(self):
-        super(Classifier, self).__init__()
+        super(TorchClassifier, self).__init__()
 
     @st.cache(allow_output_mutation=True)
     def _load_model(self) -> torch.nn.modules.container.Sequential:
@@ -77,15 +78,18 @@ class Classifier(BaseClassifier):
         self.log.info(f"Predicting batch sample : {batch}")
         return self.predict(batch)
 
-    def predict(self, batch: list) -> dict[str, str]:
+    def predict(self, batch: list, batch_inference: bool = False) -> tuple[list[Any], float] | tuple[
+        dict[Any, Any], float]:
         """
         Predict batch of sentences
+        :param batch_inference: check if predict on a file or not
         :param batch: list of text that need to be predicted
         :return: a dictionary of text and its predicted label
         """
         assert type(batch) == list, "Batch must be a list"
         begin = time()
-        batch_embedded = self.embedder.encode(batch, convert_to_tensor=True, batch_size=min(len(batch), 2048))
+        batch_embedded = [norm(i) for i in batch]
+        batch_embedded = self.embedder.encode(batch_embedded, convert_to_tensor=True, batch_size=min(len(batch), 2048))
         self.model.eval()
         with torch.no_grad():
             out_data = self.model(batch_embedded)
@@ -93,7 +97,12 @@ class Classifier(BaseClassifier):
             pred = ps.max(1).indices.cpu().numpy()
             res = [self.label_encoder.inverse_transform([i])[0] for i in pred]
 
+        if not batch_inference:
+            self.log.info(res)
+
         total_pred_time = time() - begin
+        if batch_inference:
+            return res, total_pred_time
 
         return dict(zip(batch, res)), total_pred_time
 
@@ -103,10 +112,10 @@ class ONNXClassifier(BaseClassifier):
         self.path = 'resource/classifier.onnx'
         super().__init__()
         onnx.checker.check_model(onnx.load(self.path))
-        self.model_label_name=self.model.get_outputs()[0].name
-        self.model_input_name=self.model.get_inputs()[0].name
+        self.model_label_name = self.model.get_outputs()[0].name
+        self.model_input_name = self.model.get_inputs()[0].name
 
-    # @st.cache(allow_output_mutation=True)
+    @st.cache(allow_output_mutation=True)
     def _load_model(self) -> ort.InferenceSession:
         """
         Load ONNX session with cache to prevent reloading model after predicting
@@ -150,7 +159,8 @@ class ONNXClassifier(BaseClassifier):
         self.log.info(f"Predicting batch sample : {batch}")
         return self.predict(batch)
 
-    def predict(self, batch: list) -> tuple[dict[str, str], float]:
+    def predict(self, batch: list, batch_inference: bool = False) -> tuple[list[Any], float] | tuple[
+        dict[Any, Any], float]:
         """
         Predict batch of sentences
         :param batch: list of text that need to be predicted
@@ -158,19 +168,25 @@ class ONNXClassifier(BaseClassifier):
         """
         assert type(batch) == list, "Batch must be a list"
         begin = time()
-        batch_embedded = self.embedder.encode(batch, batch_size=min(len(batch), 2048))
+        batch_embedded = [norm(i) for i in batch]
+        batch_embedded = self.embedder.encode(batch_embedded, batch_size=min(len(batch), 2048))
         pred = self.model.run([self.model_label_name], {'text_embedding': batch_embedded})
-        res = [self.label_encoder.inverse_transform([i])[0] for i in [pred[0][index].argmax(0)for index, _ in enumerate(pred[0])]]
-        self.log.info(res)
+        res = [self.label_encoder.inverse_transform([i])[0] for i in
+               [pred[0][index].argmax(0) for index, _ in enumerate(pred[0])]]
+
+        if not batch_inference:
+            self.log.info(res)
         total_pred_time = time() - begin
+
+        if batch_inference:
+            return res, total_pred_time
+
         return dict(zip(batch, res)), total_pred_time
 
 
 if __name__ == "__main__":
     classifier = ONNXClassifier()
     print(classifier.test_prediction())
-    classifier = Classifier()
+
+    classifier = TorchClassifier()
     print(classifier.test_prediction())
-
-
-
