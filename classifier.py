@@ -49,7 +49,7 @@ class TorchClassifier(BaseClassifier):
         Load model with cache to prevent reloading model after predicting
         :return: torch model
         """
-        self.log.info("Initializing Neural Net>>>")
+        self.log.info("Torch Initializing Neural Net>>>")
         return torch.load('resource/classifier.pt', map_location=torch.device('cpu'))
 
     @st.cache(allow_output_mutation=True)
@@ -87,9 +87,14 @@ class TorchClassifier(BaseClassifier):
         :return: a dictionary of text and its predicted label
         """
         assert type(batch) == list, "Batch must be a list"
-        begin = time()
-        batch_embedded = [norm(i) for i in batch]
+        begin_0 = time()
+        if not batch_inference:
+            batch_embedded = [norm(i) for i in batch]
+        else:
+            batch_embedded = batch
         batch_embedded = self.embedder.encode(batch_embedded, convert_to_tensor=True, batch_size=min(len(batch), 2048))
+        self.log.info("Torch Embedding batch accomplished in {} seconds".format(time() - begin_0))
+        begin_1 = time()
         self.model.eval()
         with torch.no_grad():
             out_data = self.model(batch_embedded)
@@ -97,10 +102,11 @@ class TorchClassifier(BaseClassifier):
             pred = ps.max(1).indices.cpu().numpy()
             res = [self.label_encoder.inverse_transform([i])[0] for i in pred]
 
+        self.log.info("Torch Predicting batch accomplished in {} seconds".format(time() - begin_1))
         if not batch_inference:
             self.log.info(res)
 
-        total_pred_time = time() - begin
+        total_pred_time = time() - begin_0
         if batch_inference:
             return res, total_pred_time
 
@@ -125,11 +131,10 @@ class ONNXClassifier(BaseClassifier):
         so = ort.SessionOptions()
         so.add_session_config_entry('session.load_model_format', 'ONNX')
         ort_sess = ort.InferenceSession(self.path, providers=['CPUExecutionProvider'], sess_options=so)
-
         if ort_sess:
-            self.log.info(f"Neural Net Initialized in {ort_sess.get_profiling_start_time_ns()} ns")
+            self.log.info(f"ONNX Neural Net Initialized in {ort_sess.get_profiling_start_time_ns()} ns")
         else:
-            self.log.error("Neural Net Initialization Failed")
+            self.log.error("ONNX Neural Net Initialization Failed")
 
         return ort_sess
 
@@ -167,16 +172,22 @@ class ONNXClassifier(BaseClassifier):
         :return: a dictionary of text and its predicted label
         """
         assert type(batch) == list, "Batch must be a list"
-        begin = time()
-        batch_embedded = [norm(i) for i in batch]
+        begin_0 = time()
+        if not batch_inference:
+            batch_embedded = [norm(i) for i in batch]
+        else:
+            batch_embedded = batch
         batch_embedded = self.embedder.encode(batch_embedded, batch_size=min(len(batch), 2048))
+        self.log.info("ONNX Embedding batch accomplished in {} seconds".format(time() - begin_0))
+        begin_1 = time()
         pred = self.model.run([self.model_label_name], {'text_embedding': batch_embedded})
         res = [self.label_encoder.inverse_transform([i])[0] for i in
                [pred[0][index].argmax(0) for index, _ in enumerate(pred[0])]]
 
+        self.log.info("ONNX Model Predicting batch accomplished in {} seconds".format(time() - begin_1))
         if not batch_inference:
             self.log.info(res)
-        total_pred_time = time() - begin
+        total_pred_time = time() - begin_0
 
         if batch_inference:
             return res, total_pred_time

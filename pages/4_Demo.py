@@ -3,6 +3,10 @@ import pandas as pd
 import streamlit as st
 from classifier import ONNXClassifier, TorchClassifier
 from normalizer import dataframe_normalize
+import logging
+
+TORCH_CLASSIFIER_NAME = "PyTorch model with pretrained Vietnamese sBERT"
+ONNX_CLASSIFIER_NAME = "Converted ONNX model with pretrained Vietnamese sBERT"
 
 st.set_page_config(initial_sidebar_state="collapsed",
                    page_title="Text Classification",
@@ -11,8 +15,8 @@ st.set_page_config(initial_sidebar_state="collapsed",
 
 
 @st.experimental_memo
-def convert_df(df):
-    return df.to_csv(index=False).encode('utf-8')
+def convert_df(dataframe):
+    return dataframe.to_csv(index=False).encode('utf-8')
 
 
 st.header("Demo with a sample batch")
@@ -24,16 +28,19 @@ st.markdown("""
 """)
 
 # Model Selection
+
+
+model_dict = {
+    TORCH_CLASSIFIER_NAME: TorchClassifier,
+    ONNX_CLASSIFIER_NAME: ONNXClassifier,
+}
 st.radio(
     "Choose your classifier",
     key="model",
-    options=["PyTorch model with pretrained Vietnamese sBERT", "Converted ONNX model with pretrained Vietnamese sBERT"],
+    disabled=False,
+    options=[TORCH_CLASSIFIER_NAME, ONNX_CLASSIFIER_NAME],
 )
 
-model_dict = {
-    "PyTorch model with pretrained Vietnamese sBERT": TorchClassifier(),
-    "Converted ONNX model with pretrained Vietnamese sBERT": ONNXClassifier(),
-}
 
 # Data Inference
 # Sentence wise inference
@@ -48,11 +55,12 @@ else:
     try:
         del classifier
         gc.collect()
-    except BaseException:
+    except BaseException as e:
+        logging.error(e)
         pass
     finally:
         classifier = model_dict[st.session_state.model]
-        res, time = classifier.predict(sentence)
+        res, time = classifier().predict(sentence)
         st.json(res)
         st.write("Prediction accomplished in {:.4} seconds".format(time))
 
@@ -68,13 +76,14 @@ else:
     try:
         del classifier
         gc.collect()
-    except BaseException:
+    except BaseException as e:
+        logging.error(e)
         pass
     finally:
         df_ori = pd.read_csv(csv_file, encoding='utf-8')
         df = dataframe_normalize(df_ori)
         classifier = model_dict[st.session_state.model]
-        res, time = classifier.predict(df['sample'].tolist(), batch_inference=True)
+        res, time = classifier().predict(df['sample'].tolist(), batch_inference=True)
         del df
         df_ori['predicted_label'] = res
         st.write(f"Model Prediction on {csv_file.name}")
