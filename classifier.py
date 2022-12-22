@@ -84,6 +84,7 @@ class TorchClassifier(BaseClassifier):
         Predict batch of sentences
         :param batch_inference: check if predict on a file or not
         :param batch: list of text that need to be predicted
+        :param batch_inference: check if predict on a file or not
         :return: a dictionary of text and its predicted label
         """
         assert type(batch) == list, "Batch must be a list"
@@ -170,6 +171,7 @@ class ONNXClassifier(BaseClassifier):
         Predict batch of sentences
         :param batch: list of text that need to be predicted
         :return: a dictionary of text and its predicted label
+        :param batch_inference: check if predict on a file or not
         """
         assert type(batch) == list, "Batch must be a list"
         begin_0 = time()

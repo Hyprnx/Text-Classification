@@ -62,7 +62,7 @@ else:
         classifier = model_dict[st.session_state.model]
         res, time = classifier().predict(sentence)
         st.json(res)
-        st.write("Prediction accomplished in {:.4} seconds".format(time))
+        st.write("{} prediction accomplished in {:.4} seconds".format(classifier.__name__, time))
 
 # Batch inference with csv file
 st.markdown("""### Try predict a file:""")
@@ -88,7 +88,7 @@ else:
         df_ori['predicted_label'] = res
         st.write(f"Model Prediction on {csv_file.name}")
         st.write(df_ori)
-        st.write("Prediction accomplished in {:.4} seconds".format(time))
+        st.write("{} prediction accomplished in {:.4} seconds".format(classifier.__name__, time))
 
         st.download_button(
             "Download Predicted file",
