@@ -131,6 +131,8 @@ class ONNXClassifier(BaseClassifier):
         self.log.info("Initializing ONNX session>>>")
         so = ort.SessionOptions()
         so.add_session_config_entry('session.load_model_format', 'ONNX')
+        so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        so.optimized_model_filepath = self.path
         ort_sess = ort.InferenceSession(self.path, providers=['CPUExecutionProvider'], sess_options=so)
         if ort_sess:
             self.log.info(f"ONNX Neural Net Initialized in {ort_sess.get_profiling_start_time_ns()} ns")
