@@ -72,6 +72,7 @@ The project should look like this:
 The project also included a model (and also the ONNX version of the model) that can be used for inference. 
 It located here: [model](resource/).
 
+
 ## Experimental:
 ### ONNX and GPU acceleration:
 The inference time could be accelerated with the help of ONNX Runtime. In the provided model, the embedding time is 
