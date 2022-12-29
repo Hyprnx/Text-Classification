@@ -46,12 +46,11 @@ st.radio(
 
 with st.expander("ℹ️ About Keras Classifier", expanded=False):
     st.markdown("""
-        # Note that choosing Keras Classifier might cause the whole server to crash and restart, but this would not
-        happen locally.
+        ### Note that choosing Keras Classifier might cause the whole server to crash and restart, but this would not happen locally.
     """)
     st.markdown("""
         Keras Classifier use TF-IDF and TruncateSVD for text embedding, which requires to download pickle files that 
-        contain sklearn pipeline from google drive. This violate policies of Streamlit Cloud, therefore, this would 
+        contains sklearn pipeline from google drive. This violate policies of Streamlit Cloud, therefore, this would 
         not run remotely, if you still want to try, clone the repo and run locally instead. Link to the pickle file 
         is in the source code it self.
     """)
