@@ -1,5 +1,6 @@
-from typing import Dict, Any, Tuple, List
+from typing import Any
 from sklearn.preprocessing import LabelEncoder
+from sklearn.pipeline import Pipeline
 import streamlit as st
 import torch
 import pickle
@@ -10,12 +11,21 @@ from time import time
 import onnx
 import onnxruntime as ort
 from normalizer import norm
+import psutil
+from common.download_pipeline import load_vectorizer
+import numpy as np
+import gc
 
 warnings.filterwarnings("ignore")
 
 logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s', level=logging.ERROR)
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
+
+NUM_CPU = psutil.cpu_count(logical=False)
+torch.set_num_threads(NUM_CPU)
+torch.set_num_interop_threads(NUM_CPU * 4)
+log.info(torch.__config__.parallel_info())
 
 
 class BaseClassifier:
@@ -37,6 +47,11 @@ class BaseClassifier:
 
     def _load_label_encoder(self):
         raise NotImplementedError("Implement in child class")
+
+    # def __del__(self):
+    #     self.log.info(f'Deleting {self.__class__.__name__}')
+    #     del self.embedder, self.model, self.label_encoder
+    #     gc.collect()
 
 
 class TorchClassifier(BaseClassifier):
@@ -79,7 +94,7 @@ class TorchClassifier(BaseClassifier):
         return self.predict(batch)
 
     def predict(self, batch: list, batch_inference: bool = False) -> tuple[list[Any], float] | tuple[
-        dict[Any, Any], float]:
+        dict[Any, Any], float]:  # noqa
         """
         Predict batch of sentences
         :param batch_inference: check if predict on a file or not
@@ -168,7 +183,7 @@ class ONNXClassifier(BaseClassifier):
         return self.predict(batch)
 
     def predict(self, batch: list, batch_inference: bool = False) -> tuple[list[Any], float] | tuple[
-        dict[Any, Any], float]:
+        dict[Any, Any], float]:  # noqa
         """
         Predict batch of sentences
         :param batch: list of text that need to be predicted
@@ -199,9 +214,84 @@ class ONNXClassifier(BaseClassifier):
         return dict(zip(batch, res)), total_pred_time
 
 
-if __name__ == "__main__":
-    classifier = ONNXClassifier()
+class KerasClassifier(BaseClassifier):
+    def __init__(self):
+        self.path = 'resource/KerasClassifier.onnx'
+        super(KerasClassifier, self).__init__()
+        onnx.checker.check_model(onnx.load(self.path))
+        self.model_label_name = self.model.get_outputs()[0].name
+        self.model_input_name = self.model.get_inputs()[0].name
+
+    @st.cache(allow_output_mutation=True)
+    def _load_model(self) -> ort.InferenceSession:
+        """
+        Load ONNX session with cache to prevent reloading model after predicting
+        :return: Onnx session model
+        """
+        self.log.info("Initializing ONNX session>>>")
+        so = ort.SessionOptions()
+        so.add_session_config_entry('session.load_model_format', 'ONNX')
+        so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        so.optimized_model_filepath = self.path
+        ort_sess = ort.InferenceSession(self.path, providers=['CPUExecutionProvider'], sess_options=so)
+        if ort_sess:
+            self.log.info(f"ONNX Neural Net Initialized in {ort_sess.get_profiling_start_time_ns()} ns")
+        else:
+            self.log.error("ONNX Neural Net Initialization Failed")
+
+        return ort_sess
+
+    @st.cache(allow_output_mutation=True)
+    def _load_embedder(self) -> Pipeline:
+        """
+        Load embedder with cache to prevent reloading embedder after predicting
+        :return: cached Sklearn Pipeline, see more in notebooks folder
+        """
+        self.log.info("Initializing embedder>>>")
+        return load_vectorizer()
+
+    @st.cache(allow_output_mutation=True)
+    def _load_label_encoder(self) -> LabelEncoder:
+        """
+        Load label encoder with cache to prevent reloading label encoder after predicting
+        :return: LabelEncoder that have been encoded with class label
+        """
+        return pickle.load(open('resource/label_encoder.pkl', 'rb'))
+
+    def test_prediction(self) -> tuple[dict[str, str], float]:
+        """
+        Test prediction
+        :return: Prediction result
+        """
+        batch = ['áo choàng đông']
+        self.log.info(f"Predicting batch sample : {batch}")
+        return self.predict(batch)
+
+    def predict(self, sample: list[str]) -> tuple[list[Any], float] | tuple[dict[Any, Any], float]:
+        """
+        Predict batch of sentences
+        :param sample: list of ONE text that need to be predicted.
+        :return: a dictionary of text and its predicted label, with prediction time.
+        """
+        assert type(sample) == list, "Batch must be a list"
+        begin_0 = time()
+        transformed_sample = [norm(i) for i in sample]
+        transformed_sample = self.embedder.transform(transformed_sample)
+        self.log.info("Sklearn Pipeline Embedding accomplished in {} seconds".format(time() - begin_0))
+        begin_1 = time()
+        pred = self.model.run(None, {'input': transformed_sample})
+        pred = self.label_encoder.inverse_transform([np.argmax(pred[0], axis=1)])
+        self.log.info("Keras model predict accomplished in {} seconds".format(time() - begin_1))
+        total_pred_time = time() - begin_0
+        return dict(zip(sample, pred)), total_pred_time
+
+
+if __name__ == '__main__':
+    # classifier = TorchClassifier()
+    # print(classifier.test_prediction())
+
+    classifier = KerasClassifier()
     print(classifier.test_prediction())
 
-    classifier = TorchClassifier()
-    print(classifier.test_prediction())
+    # classifier = ONNXClassifier()
+    # print(classifier.test_prediction())

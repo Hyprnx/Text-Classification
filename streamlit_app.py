@@ -50,5 +50,5 @@ if prod_ready:
     switch_page("The Production-Ready part")
 
 demo = st.button("Demo")
-if introduction:
+if demo:
     switch_page("Demo")

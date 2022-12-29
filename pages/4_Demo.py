@@ -1,12 +1,13 @@
 import gc
 import pandas as pd
 import streamlit as st
-from classifier import ONNXClassifier, TorchClassifier
+from classifier import ONNXClassifier, TorchClassifier, KerasClassifier
 from normalizer import dataframe_normalize
 import logging
 
 TORCH_CLASSIFIER_NAME = "PyTorch model with pretrained Vietnamese sBERT"
 ONNX_CLASSIFIER_NAME = "Converted ONNX model with pretrained Vietnamese sBERT"
+KERAS_CLASSIFIER_NAME = "Converted ONNX Keras model with TF-IDF and TruncateSVD for text embedding, ONE SAMPLE ONLY"
 
 st.set_page_config(initial_sidebar_state="collapsed",
                    page_title="Text Classification",
@@ -33,12 +34,14 @@ st.markdown("""
 model_dict = {
     TORCH_CLASSIFIER_NAME: TorchClassifier,
     ONNX_CLASSIFIER_NAME: ONNXClassifier,
+    KERAS_CLASSIFIER_NAME: KerasClassifier
+
 }
 st.radio(
     "Choose your classifier",
     key="model",
     disabled=False,
-    options=[TORCH_CLASSIFIER_NAME, ONNX_CLASSIFIER_NAME],
+    options=[TORCH_CLASSIFIER_NAME, ONNX_CLASSIFIER_NAME, KERAS_CLASSIFIER_NAME],
 )
 
 
@@ -47,6 +50,7 @@ st.radio(
 sentence = st.text_input('Input your sentence here:', placeholder="áo choàng đông, iphone 13 promax",
                          autocomplete='on')
 sentence = sentence.split(',')
+print(sentence)
 if sentence == ['']:
     st.json({"": ""})
     st.write("Prediction accomplished in 0 seconds. Please enter your sentence on text box above")
@@ -60,6 +64,7 @@ else:
         pass
     finally:
         classifier = model_dict[st.session_state.model]
+        print(st.session_state.model)
         res, time = classifier().predict(sentence)
         st.json(res)
         st.write("{} prediction accomplished in {:.4} seconds".format(classifier.__name__, time))
