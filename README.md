@@ -1,8 +1,9 @@
 # Product category classification
 
 This project is a project for final exam for Deep Learning course at National Economics University. 
-Develop by [To Duc Anh](https://github.com/Hyprnx/). The project offers a solution for product category classification
-problem. The dataset is crawled from [Shopee](https://shopee.vn/). 
+Developed by [To Duc Anh](https://github.com/Hyprnx/), Dinh Thi Ha Phuong, Nguyen Thi Hoai Linh and Nguyen Viet Duong.
+The project offers a solution for product category classification problem. The dataset is crawled from
+[Shopee](https://shopee.vn/). 
 
 This project features a deep learning model built with [PyTorch](https://pytorch.org/). The embedding data were 
 calculated with [Vietnamese sBERT](https://huggingface.co/keepitreal/vietnamese-sbert).
