@@ -72,6 +72,30 @@ The project should look like this:
 The project also included a model (and also the ONNX version of the model) that can be used for inference. 
 It located here: [model](resource/).
 
+## Experimental:
+### ONNX and GPU acceleration:
+The inference time could be accelerated with the help of ONNX Runtime. In the provided model, the embedding time is 
+pretty slow due to the fact that the embedding module is purely taken from transformer without any optimization. 
+The reason is that, firstly, the sentence embedding that we use have some problem with the vocab size, hence the ONNX 
+conversion cannot be completed. We probably can retrain the model with a smaller vocab size to make it work later on.
+Secondly, the embedding process run entirely on CPU, which might not be so efficient for parallel computing. Provide a
+GPU will definitely speed up the process. The embedding process with ~1M sentences takes around 10 minutes to complete 
+on a nVidia P100 GPU, kindly provided by Google on Kaggle.
+
+### DataFrame Library:
+The project currently use [Pandas](https://pandas.pydata.org/) and it multi-threading variance 
+[Modin](https://modin.readthedocs.io/en/latest/) to speed up data processing. But, these libraries are, still, not the 
+fastest available. We could try to use [Polars](https://pola-rs.github.io/polars-book/user-guide/index.html) - a DataFrame
+manipulation framework written in Rust. Which provide a blazing fast data processing speed. Equipped with blazing-ly 
+fast and memory-efficient property of [Rust](https://www.rust-lang.org/). But, due to it lack of features since its
+still in early development, we cannot use it for this project. But, we could try to use it in the future.
+### Deployment:
+We use the free tier of Streamlit cloud, which limited to 1GB of resources. This limitation is the reason you don't see
+phoBERT classifier on the web app. The model is too big to be deployed on Streamlit cloud.
+
+We can possibly rent a cloud base service from AWS, GCP or Azure to deploy the model. But you know, we are students, 
+there are no financial benefit from doing that for demonstration purposes.
+
 
 
 
