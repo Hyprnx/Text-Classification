@@ -1,7 +1,7 @@
 # Product category classification
 
-This project is a project for final exam for Deep Learning course at National Economics University. 
-Developed by [To Duc Anh](https://github.com/Hyprnx/), Dinh Thi Ha Phuong, Nguyen Thi Hoai Linh and Nguyen Viet Duong.
+This project is a part of graduation project "E-commerce product name categories classification utilizing advanced deep learning techniques". 
+Developed by [To Duc Anh](https://github.com/Hyprnx/) student at DSEB61, MFE.
 The project offers a solution for product category classification problem. The dataset is crawled from
 [Shopee](https://shopee.vn/). 
 
@@ -85,7 +85,7 @@ GPU will definitely speed up the process. The embedding process with ~1M sentenc
 on a nVidia P100 GPU, kindly provided by Google on Kaggle.
 
 ### DataFrame Library:
-The project currently use [Pandas](https://pandas.pydata.org/) and it multi-threading variance 
+The project currently use [Pandas](https://pandas.pydata.org/) (Pre 2.0 releases) and it multi-threading variance 
 [Modin](https://modin.readthedocs.io/en/latest/) to speed up data processing. But, these libraries are, still, not the 
 fastest available. We could try to use [Polars](https://pola-rs.github.io/polars-book/user-guide/index.html) - a DataFrame
 manipulation framework written in Rust. Which provide a blazing fast data processing speed. Equipped with blazing-ly 
