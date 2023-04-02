@@ -1,7 +1,9 @@
 # Product category classification
 
 This project is a part of graduation project "E-commerce product name categories classification utilizing advanced deep learning techniques". 
-Developed by [To Duc Anh](https://github.com/Hyprnx/) student at DSEB61, MFE.
+
+Developed by [To Duc Anh](https://github.com/Hyprnx/) student of DSEB61, MFE.
+
 The project offers a solution for product category classification problem. The dataset is crawled from
 [Shopee](https://shopee.vn/). 
 
