@@ -16,16 +16,18 @@ st.image(
 
 st.subheader(
     """
-        This is Text Classification project for the Deep Learning course at DSEB61@NEU.
+        Greeting, this is Product name classification for To Duc Anh Graduation Thesis introduction page.
     """
 )
 
 with st.expander("ℹ️ - About this page", expanded=True):
     st.write(
         """
-        This web page is purely for demonstration purpose. The model is trained on a dataset of 800 thousand products 
-        for the Final Project of Deep Learning course. We will not take any responsibility for the result of the model.
-        Thank you for your understanding.
+        Welcome to the project! This website is the result of my graduation thesis and is dedicated to providing a 
+        novel approach to product classification. I intend to accurately classify products based solely on their 
+        product names by employing cutting-edge deep learning techniques. My ambition is to make product classification 
+        simpler and more efficient for both businesses and individuals. Thank you for visiting, and I hope you find our 
+        website informative and useful in better categorizing products on e-commerce websites.
         """
     )
     st.markdown("")
