@@ -43,7 +43,7 @@ introduction = st.button("Introduction")
 if introduction:
     switch_page("Introduction")
 
-process = st.button("How we did it")
+process = st.button("How I did it")
 if process:
     switch_page("How I did it")
 
