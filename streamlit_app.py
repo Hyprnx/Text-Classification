@@ -11,7 +11,7 @@ st.title("Deep Learning Final Project")
 st.image(
     "https://images.unsplash.com/photo-1541854615901-93c354197834?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8f"
     "GVufDB8fHx8&auto=format&fit=crop&w=2073&q=80",
-    width=600,
+    width=700,
 )
 
 st.subheader(
