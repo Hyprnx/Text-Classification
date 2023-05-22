@@ -35,6 +35,6 @@ st.markdown("""
      production ready, future plan and finally, we will show a demo of our model.
 """)
 
-next_page = st.button("How we did it")
+next_page = st.button("How I did it")
 if next_page:
-    switch_page("How we did it")
+    switch_page("How I did it")

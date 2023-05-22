@@ -45,7 +45,7 @@ if introduction:
 
 process = st.button("How we did it")
 if process:
-    switch_page("How we did it")
+    switch_page("How I did it")
 
 prod_ready = st.button("The Production-Ready part")
 if prod_ready:

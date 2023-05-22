@@ -6,7 +6,7 @@ st.set_page_config(initial_sidebar_state="collapsed",
                    page_icon="📑",
                    )
 
-st.header("This is how we did it")
+st.header("This is how I did it")
 st.markdown("# Data Normalization!")
 WIDTH = 400
 
