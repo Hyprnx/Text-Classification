@@ -74,7 +74,7 @@ else:
         logging.error(e)
         pass
     finally:
-        with st.spinner("Loading data..."):
+        with st.spinner("Loading model..."):
             classifier = model_dict[st.session_state.model]
         print(st.session_state.model)
         res, time = classifier().predict(sentence)
@@ -99,8 +99,8 @@ else:
     finally:
         df_ori = pd.read_csv(csv_file, encoding='utf-8')
         df = dataframe_normalize(df_ori)
-        with st.spinner("Loading data..."):
-            classifier = model_dict[st.session_state.model]
+        with st.spinner("Loading model..."):
+        classifier = model_dict[st.session_state.model]
         res, time = classifier().predict(df['sample'].tolist(), batch_inference=True)
         del df
         df_ori['predicted_label'] = res
