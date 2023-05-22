@@ -100,7 +100,7 @@ else:
         df_ori = pd.read_csv(csv_file, encoding='utf-8')
         df = dataframe_normalize(df_ori)
         with st.spinner("Loading model..."):
-        classifier = model_dict[st.session_state.model]
+            classifier = model_dict[st.session_state.model]
         res, time = classifier().predict(df['sample'].tolist(), batch_inference=True)
         del df
         df_ori['predicted_label'] = res
