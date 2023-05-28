@@ -1,8 +1,8 @@
 # Product category classification
 
-This project is a part of graduation project "E-commerce product name categories classification utilizing advanced deep learning techniques". 
+This project is a source code for graduation project "Multi-stages Deep Learning based E-commerce Product Categorization with advanced text processing techniques". 
 
-Developed by [To Duc Anh](https://github.com/Hyprnx/) student of DSEB61, MFE.
+Developed by [To Duc Anh](https://github.com/Hyprnx/) student of DSEB61, MFE, member of NEU's DSLab, and Data Management Associate at Techcombank Vietnam.
 
 The project offers a solution for product category classification problem. The dataset is crawled from
 [Shopee](https://shopee.vn/). 
@@ -20,6 +20,7 @@ The dataset contains roughly 1,000,000 products with 4 different categories. The
 - Cosmetics
 - Fashion
 - Mom & Baby
+- Others
 
 # About the model and steps:
 Access the introduction page [here](https://hyprnx-text-classification-streamlit-app-7egu9j.streamlit.app/How_we_did_it)
@@ -30,7 +31,7 @@ This project was developed and deployed on a [Python 3.10](https://www.python.or
 machine. To run the project on your local machine, you should have Python 3.10 installed. The project was developed with
 the help of [Streamlit](https://streamlit.io/), a Python library for building web apps.
 
-### Getting Started on your local machine:
+### Getting Started on your *local* machine:
 1. Clone the project to your local machine:
 ```bash
 git clone https://github.com/Hyprnx/Text-Classification
