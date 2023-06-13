@@ -54,3 +54,6 @@ if prod_ready:
 demo = st.button("Demo")
 if demo:
     switch_page("Demo")
+
+st.markdown("[Source code](https://github.com/Hyprnx/Text-Classification)")
+

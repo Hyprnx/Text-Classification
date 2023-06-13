@@ -38,5 +38,3 @@ st.markdown("""
 next_page = st.button("How I did it")
 if next_page:
     switch_page("How I did it")
-    
-st.markdown("[Source code](https://github.com/Hyprnx/Text-Classification)")
